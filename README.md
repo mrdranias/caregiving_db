@@ -10,7 +10,8 @@ Contractor Network: Manage local service provider relationships
 Multi-Tenant Architecture: Support multiple rural healthcare organizations
 
 Getting Started
-[Your installation and setup instructions here]
+
+[installation and setup instructions here]
 
 Contributing
 
