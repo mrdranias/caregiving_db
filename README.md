@@ -11,8 +11,12 @@ Multi-Tenant Architecture: Support multiple rural healthcare organizations
 
 Getting Started
 [Your installation and setup instructions here]
+
 Contributing
+
 We welcome contributions from the rural healthcare community! Please see our contributing guidelines for more information.
+
+
 Citation
 If you use this software in academic research, publications, or commercial projects, please cite:
 Mark Dranias. (2025). Rural Care Management System: Open-source care coordination platform for rural healthcare providers. GitHub. https://github.com/mrdranias/caregiving_db
@@ -23,6 +27,8 @@ bibtex@software{rural_care_management_2025,
   url = {https://github.com/mrdranias/caregiving_db},
   year = {2025}
 }
+
+
 License
 MIT License
 Copyright (c) 2025 Mark Dranias
