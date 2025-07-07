@@ -1,0 +1,9 @@
+FROM python:3.11-slim
+WORKDIR /app
+COPY ./src/gradio_app ./src/gradio_app
+COPY requirements.gradio.txt ./
+RUN apt-get update \
+    && apt-get install -y net-tools iputils-ping iproute2 \
+    && pip install --no-cache-dir -r requirements.gradio.txt
+EXPOSE 7860
+CMD ["python", "src/gradio_app/main.py"]

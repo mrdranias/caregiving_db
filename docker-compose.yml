@@ -1,0 +1,45 @@
+#version: '3.9'
+services:
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile.fastapi
+    container_name: care_fastapi
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    volumes:
+      - ./src/fastapi_app:/app
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/care_db
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  gradio:
+    build:
+      context: .
+      dockerfile: Dockerfile.gradio
+    container_name: care_gradio
+    command: python src/gradio_app/main.py  # Or: python main.py if you flatten gradio_app too
+    volumes:
+      - ./src/gradio_app:/app/src/gradio_app
+    environment:
+      - API_URL=http://fastapi:8000
+      - GRADIO_LOG_LEVEL=DEBUG
+    ports:
+      - "7860:7860"
+    depends_on:
+      - fastapi
+  db:
+    image: postgres:15
+    container_name: care_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: care_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+volumes:
+  postgres_data:

@@ -1,0 +1,26 @@
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies for pygraphviz
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    graphviz \
+    libgraphviz-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy app code
+COPY ./src/fastapi_app/ ./
+COPY seed_codes.py ./
+COPY requirements.fastapi.txt ./
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.fastapi.txt
+
+# Expose app port
+EXPOSE 8000
+
+# Start FastAPI app
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
