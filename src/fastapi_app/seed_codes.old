@@ -1,0 +1,508 @@
+import psycopg2
+import uuid
+
+# Update these as needed for your environment
+DB_CONFIG = {
+    'dbname': 'care_db',
+    'user': 'postgres',
+    'password': 'postgres',
+    'host': 'care_db',
+    'port': 5432
+}
+
+def seed_codes():
+    conn = psycopg2.connect(**DB_CONFIG)
+    cur = conn.cursor()
+
+    dx_codes = [
+        ("E11.9", "Type 2 diabetes mellitus without complications"),
+        ("I10", "Essential (primary) hypertension"),
+        ("E78.5", "Hyperlipidemia, unspecified"),
+        ("M81.0", "Age-related osteoporosis"),
+        ("I25.10", "Atherosclerotic heart disease of native coronary artery"),
+        ("M17.9", "Osteoarthritis of knee, unspecified"),
+        ("M19.90", "Osteoarthritis, unspecified site"),
+        ("J44.9", "Chronic obstructive pulmonary disease, unspecified"),
+        ("N18.9", "Chronic kidney disease, unspecified"),
+        ("F32.9", "Major depressive disorder, single episode, unspecified"),
+        ("F03.90", "Dementia, unspecified"),
+        ("I69.351", "Hemiplegia, unspecified side"),
+        ("G30.9", "Alzheimer’s disease, unspecified"),
+        ("G20", "Parkinson’s disease"),
+        ("F41.9", "Anxiety disorder, unspecified"),
+        ("I48.91", "Atrial fibrillation, unspecified"),
+        ("I50.9", "Heart failure, unspecified"),
+        ("J45.909", "Unspecified asthma, uncomplicated"),
+        ("E03.9", "Hypothyroidism, unspecified"),
+        ("N39.0", "Urinary tract infection, site not specified"),
+        ("K21.9", "Gastro-esophageal reflux disease without esophagitis"),
+        ("M54.5", "Low back pain"),
+        ("R51", "Headache"),
+        ("I63.9", "Cerebral infarction, unspecified"),
+        ("K59.00", "Constipation, unspecified"),
+        ("R53.83", "Other fatigue"),
+        ("R26.9", "Unspecified abnormalities of gait and mobility")
+    ]
+    cur.executemany("INSERT INTO dx_codes (code, description) VALUES (%s, %s) ON CONFLICT DO NOTHING", dx_codes)
+
+    tx_codes = [
+        ("99213", "Office/outpatient visit, established patient"),
+        ("99214", "Office/outpatient visit, est. pt, moderate complexity"),
+        ("99396", "Periodic comprehensive preventive medicine, established patient"),
+        ("80053", "Comprehensive metabolic panel"),
+        ("81002", "Urinalysis, non-automated"),
+        ("36415", "Collection of venous blood by venipuncture"),
+        ("93000", "Electrocardiogram, routine"),
+        ("90471", "Immunization administration"),
+        ("90460", "Immunization admin through 18 years"),
+        ("97110", "Therapeutic exercises"),
+        ("97530", "Therapeutic activities"),
+        ("99406", "Smoking cessation counseling"),
+        ("96372", "Therapeutic, prophylactic, or diagnostic injection"),
+        ("94760", "Pulse oximetry"),
+        ("82947", "Glucose; quantitative, blood"),
+        ("99395", "Periodic comprehensive preventive medicine, established patient"),
+        ("97140", "Manual therapy techniques"),
+        ("G0439", "Annual wellness visit, subsequent"),
+        ("G0442", "Annual alcohol misuse screening"),
+        ("G0444", "Annual depression screening"),
+        ("G0446", "Intensive behavioral therapy for cardiovascular disease"),
+        ("G0447", "Obesity counseling"),
+        ("G0451", "Developmental testing, limited"),
+        ("99407", "Smoking cessation counseling, intensive"),
+        ("90658", "Influenza virus vaccine")
+    ]
+    cur.executemany("INSERT INTO tx_codes (code, description) VALUES (%s, %s) ON CONFLICT DO NOTHING", tx_codes)
+
+    severity_levels = [
+        ("1", "None", 0, 1.0, "No discomfort/impact"),
+        ("2", "Mild", 1, 0.9, "Mild discomfort, does not interfere with activities"),
+        ("3", "Moderate", 2, 0.7, "Noticeable, some interference with activities"),
+        ("4", "Severe", 3, 0.5, "Severe, substantial interference, distress"),
+        ("5", "Extreme", 4, 0.2, "Extreme, disabling, prevents activities, constant"),
+    ]
+    cur.executemany("INSERT INTO severity_levels (severity_code, label, ordinal, utility_weight, description) VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING", severity_levels)
+
+    frequency_levels = [
+        ("1", "Constant", 5, "Always present"),
+        ("2", "Hourly", 4, "Occurs every hour or more frequently"),
+        ("3", "Daily", 3, "Occurs at least once per day"),
+        ("4", "Weekly", 2, "Occurs at least once per week"),
+        ("5", "Monthly", 1, "Occurs at least once per month"),
+        ("6", "Not at all", 0, "Does not occur"),
+    ]
+    cur.executemany("INSERT INTO frequency_levels (frequency_code, label, ordinal, description) VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING", frequency_levels)
+
+    rx_codes = [
+        ("RX001", "Lisinopril"),
+        ("RX002", "Levothyroxine"),
+        ("RX003", "Atorvastatin"),
+        ("RX004", "Metformin"),
+        ("RX005", "Amlodipine"),
+        ("RX006", "Metoprolol"),
+        ("RX007", "Omeprazole"),
+        ("RX008", "Simvastatin"),
+        ("RX009", "Losartan"),
+        ("RX010", "Albuterol"),
+        ("RX011", "Gabapentin"),
+        ("RX012", "Hydrochlorothiazide"),
+        ("RX013", "Sertraline"),
+        ("RX014", "Montelukast"),
+        ("RX015", "Fluticasone"),
+        ("RX016", "Amoxicillin"),
+        ("RX017", "Pantoprazole"),
+        ("RX018", "Escitalopram"),
+        ("RX019", "Rosuvastatin"),
+        ("RX020", "Tamsulosin"),
+        ("RX021", "Bupropion"),
+        ("RX022", "Pravastatin"),
+        ("RX023", "Citalopram"),
+        ("RX024", "Tramadol"),
+        ("RX025", "Meloxicam")
+    ]
+    cur.executemany("INSERT INTO rx_codes (code, description) VALUES (%s, %s) ON CONFLICT DO NOTHING", rx_codes)
+
+    sx_codes = [
+        ("SX01", "Fatigue"),
+        ("SX02", "Headache"),
+        ("SX03", "Cough"),
+        ("SX04", "Fever"),
+        ("SX05", "Shortness of breath"),
+        ("SX06", "Chest pain"),
+        ("SX07", "Back pain"),
+        ("SX08", "Abdominal pain"),
+        ("SX09", "Nausea"),
+        ("SX10", "Dizziness"),
+        ("SX11", "Joint pain"),
+        ("SX12", "Sore throat"),
+        ("SX13", "Rash"),
+        ("SX14", "Diarrhea"),
+        ("SX15", "Constipation"),
+        ("SX16", "Muscle weakness"),
+        ("SX17", "Edema"),
+        ("SX18", "Memory loss"),
+        ("SX19", "Weight loss"),
+        ("SX20", "Insomnia"),
+        ("SX21", "Urinary incontinence"),
+        ("SX22", "Visual disturbance"),
+        ("SX23", "Hearing loss"),
+        ("SX24", "Gait instability"),
+        ("SX25", "Falls"),
+        ("SX26", "Numbness"),
+        ("R52", "Chronic pain"),
+        ("R06.0", "Dyspnea"),
+        ("R53.83", "Fatigue"),
+        ("R26.9", "Gait abnormality"),
+        ("R41.3", "Memory loss"),
+        ("Z60.2", "Social isolation")
+    ]
+    cur.executemany("INSERT INTO sx_codes (code, description) VALUES (%s, %s) ON CONFLICT DO NOTHING", sx_codes)
+
+    caregiver_services = [
+        ("G0156", "Home health aide", "ADL/IADL", "Personal care, ADL/IADL support at home"),
+        ("G0299", "RN services, home health/hospice", "Nursing", "Registered nurse, home health/hospice, per 15 min"),
+        ("G0300", "LPN/LVN services, home health/hospice", "Nursing", "Licensed practical/vocational nurse, home health/hospice, per 15 min"),
+        ("T1019", "Personal care services", "ADL/IADL", "Non-medical personal care, per 15 min"),
+        ("S9123", "Nursing care, home, RN", "Nursing", "Nursing care by RN, per hour, home visit"),
+        ("S9122", "Home health aide, per hour", "ADL/IADL", "Home health aide, per hour"),
+        ("S9128", "Speech therapy, home", "Therapy", "Speech therapy, home visit, per hour"),
+        ("S9129", "Occupational therapy, home", "Therapy", "Occupational therapy, home visit, per hour"),
+        ("S9131", "Physical therapy, home", "Therapy", "Physical therapy, home visit, per hour"),
+        ("T1021", "Companion services", "Non-medical", "Companionship, supervision, socialization, per 15 min"),
+        ("T1005", "Respite care, per 15 min", "Respite", "Temporary relief for caregiver, per 15 min"),
+        ("T2042", "Hospice routine home care", "Hospice/Palliative", "Routine home hospice care, per diem"),
+        ("T2046", "Hospice continuous home care", "Hospice/Palliative", "Continuous home hospice care, per hour"),
+        ("99509", "Home visit for ADL assistance", "ADL/IADL", "Home visit for assistance with ADLs"),
+        ("S9125", "Respite care, home, per hour", "Respite", "Respite care, home, per hour"),
+        ("G0151", "Physical therapy, home health", "Therapy", "Physical therapy, home health, per 15 min"),
+        ("G0152", "Occupational therapy, home health", "Therapy", "Occupational therapy, home health, per 15 min"),
+        ("G0153", "Speech-language pathology, home health", "Therapy", "Speech-language pathology, home health, per 15 min"),
+        ("G0155", "Social worker, home health", "Social work", "Medical social services, home health, per 15 min"),
+        ("G0162", "Skilled services by aide, home health", "ADL/IADL", "Skilled services by aide, home health, per 15 min"),
+        ("T1002", "RN services, up to 15 min", "Nursing", "Registered nurse, up to 15 min"),
+        ("T1003", "LPN/LVN services, up to 15 min", "Nursing", "Licensed practical/vocational nurse, up to 15 min"),
+        ("T1004", "Home health aide, up to 15 min", "ADL/IADL", "Home health aide, up to 15 min"),
+        ("T1015", "Clinic visit, all-inclusive", "Clinic", "Clinic visit, all-inclusive"),
+        ("G0493", "RN care management, home", "Care Management", "RN care management, home, per 15 min"),
+        ("G0494", "LPN care management, home", "Care Management", "LPN care management, home, per 15 min"),
+        ("G0495", "Home visit for care management", "Care Management", "Home visit for care management, per 15 min"),
+        ("S5130", "Homemaker services, per 15 min", "Non-medical", "Homemaker services, per 15 min"),
+        ("S5135", "Companion services, per diem", "Non-medical", "Companion services, per diem"),
+        ("T1016", "Case management, per 15 min", "Care Management", "Case management, per 15 min"),
+        ("T1017", "Targeted case management, per 15 min", "Care Management", "Targeted case management, per 15 min"),
+        ("T2025", "Waiver services, per diem", "Waiver", "Waiver services, per diem"),
+        ("T2033", "Residential care, per diem", "Residential", "Residential care, per diem"),
+        ("G0157", "Aide training and supervision, home health", "ADL/IADL", "Aide training/supervision, home health, per 15 min"),
+        ("G0158", "Home health aide, hospice", "ADL/IADL", "Home health aide, hospice, per 15 min"),
+        ("G0159", "Aide, hospice, training/supervision", "ADL/IADL", "Aide, hospice, training/supervision, per 15 min"),
+        ("G0160", "Services by aide, hospice", "ADL/IADL", "Services by aide, hospice, per 15 min"),
+        ("G0161", "Skilled services by aide, hospice", "ADL/IADL", "Skilled services by aide, hospice, per 15 min"),
+        ("T2040", "Hospice continuous home care, per hour", "Hospice/Palliative", "Hospice continuous home care, per hour"),
+        ("T2041", "Hospice routine home care, per diem", "Hospice/Palliative", "Hospice routine home care, per diem"),
+        ("S9127", "Home health aide, per visit", "ADL/IADL", "Home health aide, per visit"),
+        ("S9124", "Nursing care, home, LPN/LVN, per hour", "Nursing", "Nursing care, home, LPN/LVN, per hour"),
+        ("S9136", "Home health aide, overnight", "ADL/IADL", "Home health aide, overnight"),
+        ("T1028", "Assessment/evaluation, per encounter", "Assessment", "Assessment/evaluation, per encounter"),
+        ("T1029", "Assessment/evaluation, per hour", "Assessment", "Assessment/evaluation, per hour"),
+        ("T1030", "Assessment/evaluation, per diem", "Assessment", "Assessment/evaluation, per diem"),
+        ("T1031", "Assessment/evaluation, per month", "Assessment", "Assessment/evaluation, per month"),
+    ]
+    cur.executemany("INSERT INTO caregiver_services (service_code, service_name, category, description) VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING", caregiver_services)
+
+    # --- Seed revised hazard/service hierarchy and mappings ---
+    hazard_classes = [
+        ("ADL_HEAVY", "Heavy ADL Impairment", "Intensive ADL needs: bed mobility, transfers, total assist bathing, heavy lifting"),
+        ("ADL_LIGHT", "Light ADL Impairment", "Routine ADL needs: dressing, grooming, feeding, ambulatory toileting"),
+        ("IADL_VEHICLE", "Vehicle IADL Impairment", "IADL needs requiring transportation or vehicle use"),
+        ("IADL_NONVEHICLE", "Non-Vehicle IADL Impairment", "IADL needs not requiring vehicle: cooking, cleaning, medication, finances"),
+        ("COG", "Cognitive Impairment", "Cognitive or memory difficulties"),
+        ("MOB", "Mobility/Falls Risk", "Mobility limitations or fall risk"),
+        ("SYM_LIFE", "Symptom: Life-Threatening", "Acute, life-threatening symptoms: severe pain, dyspnea, delirium"),
+        ("SYM_DISAB", "Symptom: Disabling", "Chronic or disabling symptoms: chronic pain, severe fatigue"),
+        ("MOOD", "Mood/Behavioral Disorder", "Mood or behavioral: depression, disinhibition"),
+        ("MED", "Medical Complexity", "Multiple or complex medical conditions"),
+        ("SOC", "Social/Environmental Risk", "Social or environmental risks")
+    ]
+    cur.executemany("INSERT INTO hazard_classes (class_id, label, description) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING", hazard_classes)
+
+    hazard_subclasses = [
+        # Heavy ADL
+        ("ADL_BED", "Bed mobility difficulty", "ADL_HEAVY", "Difficulty moving in bed"),
+        ("ADL_TRAN", "Transfers difficulty", "ADL_HEAVY", "Difficulty transferring (bed/chair)"),
+        ("ADL_BATH_HEAVY", "Total assist bathing", "ADL_HEAVY", "Needs total assist bathing (bedbound)"),
+        # Light ADL
+        ("ADL_FEED", "Feeding difficulty", "ADL_LIGHT", "Difficulty feeding self"),
+        ("ADL_DRESS", "Dressing difficulty", "ADL_LIGHT", "Difficulty dressing"),
+        ("ADL_GROOM", "Grooming difficulty", "ADL_LIGHT", "Difficulty grooming"),
+        ("ADL_TOIL_LIGHT", "Toileting difficulty (ambulatory)", "ADL_LIGHT", "Toileting difficulty, ambulatory"),
+        # Vehicle IADL
+        ("IADL_TRANS", "Transportation difficulty", "IADL_VEHICLE", "Difficulty with transportation"),
+        ("IADL_SHOP", "Shopping difficulty", "IADL_VEHICLE", "Difficulty shopping for groceries/errands"),
+        # Non-Vehicle IADL
+        ("IADL_COOK", "Cooking difficulty", "IADL_NONVEHICLE", "Difficulty preparing meals"),
+        ("IADL_CLEAN", "Cleaning difficulty", "IADL_NONVEHICLE", "Difficulty with housekeeping"),
+        ("IADL_MED", "Medication management difficulty", "IADL_NONVEHICLE", "Difficulty managing medications"),
+        ("IADL_FIN", "Finances difficulty", "IADL_NONVEHICLE", "Difficulty managing finances"),
+        # Cognitive
+        ("COG_MEM", "Memory loss", "COG", "Memory impairment"),
+        ("COG_DEC", "Decision-making difficulty", "COG", "Difficulty making decisions"),
+        # Mobility
+        ("MOB_WALK", "Walking difficulty", "MOB", "Difficulty walking"),
+        ("MOB_FALL", "Frequent falls", "MOB", "History of falls"),
+        # Symptom - Life Threatening
+        ("SYM_PAIN_ACUTE", "Acute severe pain", "SYM_LIFE", "Severe, life-threatening pain"),
+        ("SYM_DYSPNEA", "Acute dyspnea", "SYM_LIFE", "Acute shortness of breath"),
+        # Symptom - Disabling
+        ("SYM_PAIN_CHRONIC", "Chronic pain", "SYM_DISAB", "Chronic, disabling pain"),
+        ("SYM_FATIG", "Severe fatigue", "SYM_DISAB", "Chronic severe fatigue"),
+        # Mood/Behavioral
+        ("MOOD_DEP", "Depression", "MOOD", "Depressive symptoms"),
+        ("MOOD_DISINH", "Disinhibition", "MOOD", "Behavioral disinhibition"),
+        # Medical
+        ("MED_POLY", "Polypharmacy", "MED", "Many medications"),
+        ("MED_MULTI", "Multiple conditions", "MED", "Multiple chronic illnesses"),
+        # Social
+        ("SOC_UNSAFE", "Unsafe home", "SOC", "Unsafe home environment"),
+        ("SOC_ISOL", "Social isolation", "SOC", "Social isolation/loneliness")
+    ]
+    cur.executemany("INSERT INTO hazard_subclasses (subclass_id, label, parent_class_id, description) VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING", hazard_subclasses)
+
+    service_classes = [
+        ("SVC_HEAVY_PC", "Heavy Personal Care", "Intensive ADL support: bedbound, heavy lifting"),
+        ("SVC_LIGHT_PC", "Light Personal Care", "Routine ADL support: feeding, dressing, grooming"),
+        ("SVC_VEHICLE_HS", "Vehicle Home Support", "IADL support requiring vehicle: transportation, shopping"),
+        ("SVC_NONVEHICLE_HS", "Non-Vehicle Home Support", "IADL support: cooking, cleaning, medication, finances"),
+        ("SVC_COG_SUP", "Cognitive Supervision", "Supervision for cognitive impairment"),
+        ("SVC_MOB_TH", "Mobility Therapy", "Therapy for mobility/falls"),
+        ("SVC_SYM_LIFE", "Symptom Management (Life-Threatening)", "Management of acute/life-threatening symptoms"),
+        ("SVC_SYM_DISAB", "Symptom Management (Disabling)", "Management of chronic/disabling symptoms"),
+        ("SVC_MOOD", "Mood/Behavioral Support", "Support for mood/behavioral disorders"),
+        ("SVC_MED_MGMT", "Medical Management", "Complex medical management"),
+        ("SVC_SOC_SUP", "Social/Environmental Support", "Support for social/environmental risks")
+    ]
+    cur.executemany("INSERT INTO service_classes (class_id, label, description) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING", service_classes)
+
+    service_subclasses = [
+        # Heavy Personal Care
+        ("SVC_BED", "Bed mobility assistance", "SVC_HEAVY_PC", "Assist with bed mobility"),
+        ("SVC_TRAN", "Transfer assistance", "SVC_HEAVY_PC", "Assist with transfers"),
+        ("SVC_BATH_HEAVY", "Total assist bathing", "SVC_HEAVY_PC", "Total assist bathing (bedbound)"),
+        # Light Personal Care
+        ("SVC_FEED", "Feeding assistance", "SVC_LIGHT_PC", "Assist with feeding"),
+        ("SVC_DRESS", "Dressing assistance", "SVC_LIGHT_PC", "Assist with dressing"),
+        ("SVC_GROOM", "Grooming assistance", "SVC_LIGHT_PC", "Assist with grooming"),
+        ("SVC_TOIL_LIGHT", "Toileting assistance (ambulatory)", "SVC_LIGHT_PC", "Toileting assist, ambulatory"),
+        # Vehicle Home Support
+        ("SVC_TRANS", "Transportation", "SVC_VEHICLE_HS", "Transportation support"),
+        ("SVC_SHOP", "Shopping support", "SVC_VEHICLE_HS", "Shopping/errands support"),
+        # Non-Vehicle Home Support
+        ("SVC_COOK", "Meal preparation", "SVC_NONVEHICLE_HS", "Assist with meal prep"),
+        ("SVC_CLEAN", "Housekeeping", "SVC_NONVEHICLE_HS", "Assist with cleaning"),
+        ("SVC_MED", "Medication reminders", "SVC_NONVEHICLE_HS", "Medication reminders"),
+        ("SVC_FIN", "Financial management", "SVC_NONVEHICLE_HS", "Assist with finances"),
+        # Cognitive Supervision
+        ("SVC_MEM", "Memory supervision", "SVC_COG_SUP", "Supervision for memory loss"),
+        ("SVC_DEC", "Decision-making support", "SVC_COG_SUP", "Support for decision-making"),
+        # Mobility Therapy
+        ("SVC_WALK", "Gait training", "SVC_MOB_TH", "Therapy for walking/mobility"),
+        ("SVC_FALL", "Fall prevention", "SVC_MOB_TH", "Fall prevention"),
+        # Symptom Management (Life-Threatening)
+        ("SVC_PAIN_ACUTE", "Acute pain management", "SVC_SYM_LIFE", "Management of acute severe pain"),
+        ("SVC_DYSPNEA", "Acute dyspnea management", "SVC_SYM_LIFE", "Management of acute dyspnea"),
+        # Symptom Management (Disabling)
+        ("SVC_PAIN_CHRONIC", "Chronic pain management", "SVC_SYM_DISAB", "Management of chronic pain"),
+        ("SVC_FATIG", "Fatigue management", "SVC_SYM_DISAB", "Management of severe fatigue"),
+        # Mood/Behavioral Support
+        ("SVC_DEP", "Depression support", "SVC_MOOD", "Support for depression"),
+        ("SVC_DISINH", "Disinhibition support", "SVC_MOOD", "Support for disinhibition"),
+        # Medical Management
+        ("SVC_POLY", "Polypharmacy management", "SVC_MED_MGMT", "Management of polypharmacy"),
+        ("SVC_MULTI", "Multi-condition care", "SVC_MED_MGMT", "Care for multiple conditions"),
+        # Social/Environmental Support
+        ("SVC_UNSAFE", "Home safety assessment", "SVC_SOC_SUP", "Assessment for home safety"),
+        ("SVC_ISOL", "Social support", "SVC_SOC_SUP", "Support for isolation/loneliness")
+    ]
+    cur.executemany("INSERT INTO service_subclasses (subclass_id, label, parent_class_id, description) VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING", service_subclasses)
+
+    hazard_service_map = [
+        # Heavy ADL
+        ("ADL_BED", "SVC_BED", "SVC_HEAVY_PC"),
+        ("ADL_TRAN", "SVC_TRAN", "SVC_HEAVY_PC"),
+        ("ADL_BATH_HEAVY", "SVC_BATH_HEAVY", "SVC_HEAVY_PC"),
+        # Light ADL
+        ("ADL_FEED", "SVC_FEED", "SVC_LIGHT_PC"),
+        ("ADL_DRESS", "SVC_DRESS", "SVC_LIGHT_PC"),
+        ("ADL_GROOM", "SVC_GROOM", "SVC_LIGHT_PC"),
+        ("ADL_TOIL_LIGHT", "SVC_TOIL_LIGHT", "SVC_LIGHT_PC"),
+        # Vehicle IADL
+        ("IADL_TRANS", "SVC_TRANS", "SVC_VEHICLE_HS"),
+        ("IADL_SHOP", "SVC_SHOP", "SVC_VEHICLE_HS"),
+        # Non-Vehicle IADL
+        ("IADL_COOK", "SVC_COOK", "SVC_NONVEHICLE_HS"),
+        ("IADL_CLEAN", "SVC_CLEAN", "SVC_NONVEHICLE_HS"),
+        ("IADL_MED", "SVC_MED", "SVC_NONVEHICLE_HS"),
+        ("IADL_FIN", "SVC_FIN", "SVC_NONVEHICLE_HS"),
+        # Cognitive
+        ("COG_MEM", "SVC_MEM", "SVC_COG_SUP"),
+        ("COG_DEC", "SVC_DEC", "SVC_COG_SUP"),
+        # Mobility
+        ("MOB_WALK", "SVC_WALK", "SVC_MOB_TH"),
+        ("MOB_FALL", "SVC_FALL", "SVC_MOB_TH"),
+        # Symptom - Life Threatening
+        ("SYM_PAIN_ACUTE", "SVC_PAIN_ACUTE", "SVC_SYM_LIFE"),
+        ("SYM_DYSPNEA", "SVC_DYSPNEA", "SVC_SYM_LIFE"),
+        # Symptom - Disabling
+        ("SYM_PAIN_CHRONIC", "SVC_PAIN_CHRONIC", "SVC_SYM_DISAB"),
+        ("SYM_FATIG", "SVC_FATIG", "SVC_SYM_DISAB"),
+        # Mood/Behavioral
+        ("MOOD_DEP", "SVC_DEP", "SVC_MOOD"),
+        ("MOOD_DISINH", "SVC_DISINH", "SVC_MOOD"),
+        # Medical
+        ("MED_POLY", "SVC_POLY", "SVC_MED_MGMT"),
+        ("MED_MULTI", "SVC_MULTI", "SVC_MED_MGMT"),
+        # Social
+        ("SOC_UNSAFE", "SVC_UNSAFE", "SVC_SOC_SUP"),
+        ("SOC_ISOL", "SVC_ISOL", "SVC_SOC_SUP")
+    ]
+    cur.executemany("INSERT INTO hazard_service_map (hazard_subclass_id, service_subclass_id, parent_service_class_id) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING", hazard_service_map)
+
+    parent_hazard_service_map = [
+        ("ADL_HEAVY", "SVC_HEAVY_PC"),
+        ("ADL_LIGHT", "SVC_LIGHT_PC"),
+        ("IADL_VEHICLE", "SVC_VEHICLE_HS"),
+        ("IADL_NONVEHICLE", "SVC_NONVEHICLE_HS"),
+        ("COG", "SVC_COG_SUP"),
+        ("MOB", "SVC_MOB_TH"),
+        ("SYM_LIFE", "SVC_SYM_LIFE"),
+        ("SYM_DISAB", "SVC_SYM_DISAB"),
+        ("MOOD", "SVC_MOOD"),
+        ("MED", "SVC_MED_MGMT"),
+        ("SOC", "SVC_SOC_SUP")
+    ]
+    cur.executemany("INSERT INTO parent_hazard_service_map (hazard_class_id, service_class_id) VALUES (%s, %s) ON CONFLICT DO NOTHING", parent_hazard_service_map)
+
+    # --- Add 3 fake patients ---
+    patients = [
+        ("ffbbc890-5882-4b57-8837-272c1d611d5e", "Alice Smith", "1980-01-01", "Female", "555-1234", "alice@example.com"),
+        ("018bc6d7-d69d-4fad-9707-768b1f0e5508", "Bob Jones", "1975-05-23", "Male", "555-5678", "bob@example.com"),
+        ("e63746e0-c02e-4f12-806f-25f45a29380e", "Charlie Brown", "1990-09-15", "Other", "555-9012", "charlie@example.com")
+    ]
+    cur.executemany("INSERT INTO patients (patient_id, name, dob, gender, phone, email) VALUES (%s, %s, %s, %s, %s, %s) ON CONFLICT DO NOTHING", patients)
+
+    # --- Seed unique ADL, IADL, and patient history for each patient ---
+    # Alice Smith: moderate ADL/IADL impairment, diabetes, hypertension
+    cur.execute("""
+        INSERT INTO adl_answers (patient_id, date_completed, feeding, bathing, grooming, dressing, bowels, bladder, toilet_use, transfers, mobility, stairs, answers)
+        VALUES (%s, CURRENT_DATE, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, %s)
+    """, (patients[0][0], '{"notes": "Needs some help with most ADLs"}'))
+    cur.execute("""
+        INSERT INTO iadl_answers (patient_id, date_completed, telephone, shopping, food_preparation, housekeeping, laundry, transportation, medication, finances, answers)
+        VALUES (%s, CURRENT_DATE, 2, 3, 2, 3, 2, 2, 2, 3, %s)
+    """, (patients[0][0], '{"notes": "Some IADL difficulty, especially shopping and finances"}'))
+    cur.execute("""
+        INSERT INTO patient_history (patient_id, dx_codes, tx_codes, rx_codes, sx_codes, notes)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, (patients[0][0], ['E11.9', 'I10'], ['99213', '80053'], ['RX001', 'RX003'], ['SX01', 'SX19'], 'Type 2 diabetes, hypertension, fatigue'))
+
+    # Bob Jones: severe ADL impairment, mild IADL impairment, Alzheimer's, falls
+    cur.execute("""
+        INSERT INTO adl_answers (patient_id, date_completed, feeding, bathing, grooming, dressing, bowels, bladder, toilet_use, transfers, mobility, stairs, answers)
+        VALUES (%s, CURRENT_DATE, 4, 4, 3, 4, 3, 3, 4, 4, 4, 4, %s)
+    """, (patients[1][0], '{"notes": "Needs total assistance with most ADLs"}'))
+    cur.execute("""
+        INSERT INTO iadl_answers (patient_id, date_completed, telephone, shopping, food_preparation, housekeeping, laundry, transportation, medication, finances, answers)
+        VALUES (%s, CURRENT_DATE, 3, 2, 2, 2, 3, 3, 3, 3, %s)
+    """, (patients[1][0], '{"notes": "Mild IADL impairment"}'))
+    cur.execute("""
+        INSERT INTO patient_history (patient_id, dx_codes, tx_codes, rx_codes, sx_codes, notes)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, (patients[1][0], ['G30.9'], ['99396'], ['RX011'], ['SX18', 'SX25'], 'Alzheimer’s, history of falls, memory loss'))
+
+    # Charlie Brown: mild ADL/IADL impairment, depression, hypothyroidism
+    cur.execute("""
+        INSERT INTO adl_answers (patient_id, date_completed, feeding, bathing, grooming, dressing, bowels, bladder, toilet_use, transfers, mobility, stairs, answers)
+        VALUES (%s, CURRENT_DATE, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, %s)
+    """, (patients[2][0], '{"notes": "Mostly independent, some trouble with stairs/mobility"}'))
+    cur.execute("""
+        INSERT INTO iadl_answers (patient_id, date_completed, telephone, shopping, food_preparation, housekeeping, laundry, transportation, medication, finances, answers)
+        VALUES (%s, CURRENT_DATE, 1, 1, 1, 1, 1, 1, 2, 2, %s)
+    """, (patients[2][0], '{"notes": "Independent except for medication and finances"}'))
+    cur.execute("""
+        INSERT INTO patient_history (patient_id, dx_codes, tx_codes, rx_codes, sx_codes, notes)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, (patients[2][0], ['F32.9', 'E03.9'], ['99406'], ['RX013', 'RX002'], ['SX19', 'SX20'], 'Depression, hypothyroidism, fatigue, insomnia'))
+
+    conn.commit()
+    print("Reference code tables and sample patients seeded!")
+
+    # --- Seed ADL item to hazard map ---
+    adl_item_hazard_map = [
+        ("bathing", 3, 4, "ADL_BATH_HEAVY", None),   # 3-4 = total assist, maps to child
+        ("bathing", 1, 2, None, "ADL_HEAVY"),         # 1-2 = some help, maps to parent only
+        ("feeding", 3, 4, "ADL_FEED", None),
+        ("feeding", 1, 2, None, "ADL_LIGHT"),
+        ("dressing", 3, 4, "ADL_DRESS", None),
+        ("dressing", 1, 2, None, "ADL_LIGHT"),
+        ("transfers", 3, 4, "ADL_TRAN", None),
+        ("transfers", 1, 2, None, "ADL_HEAVY"),
+        ("grooming", 3, 4, "ADL_GROOM", None),
+        ("grooming", 1, 2, None, "ADL_LIGHT"),
+        ("toilet_use", 3, 4, "ADL_TOIL_LIGHT", None),
+        ("toilet_use", 1, 2, None, "ADL_LIGHT"),
+    ]
+    cur.executemany("INSERT INTO adl_item_hazard_map (adl_item, score_min, score_max, hazard_subclass_id, hazard_class_id) VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING", adl_item_hazard_map)
+
+    # --- Seed IADL item to hazard map ---
+    iadl_item_hazard_map = [
+        ("shopping", 3, 4, "IADL_SHOP", None),
+        ("shopping", 1, 2, None, "IADL_VEHICLE"),
+        ("food_preparation", 3, 4, "IADL_COOK", None),
+        ("food_preparation", 1, 2, None, "IADL_NONVEHICLE"),
+        ("housekeeping", 3, 4, "IADL_CLEAN", None),
+        ("housekeeping", 1, 2, None, "IADL_NONVEHICLE"),
+        ("transportation", 3, 4, "IADL_TRANS", None),
+        ("transportation", 1, 2, None, "IADL_VEHICLE"),
+        ("medication", 3, 4, "IADL_MED", None),
+        ("medication", 1, 2, None, "IADL_NONVEHICLE"),
+        ("finances", 3, 4, "IADL_FIN", None),
+        ("finances", 1, 2, None, "IADL_NONVEHICLE"),
+    ]
+    cur.executemany("INSERT INTO iadl_item_hazard_map (iadl_item, score_min, score_max, hazard_subclass_id, hazard_class_id) VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING", iadl_item_hazard_map)
+
+    # --- Seed Sx code to hazard map ---
+    sx_code_hazard_map = [
+        ("R52", "SYM_PAIN_CHRONIC", "SYM_DISAB"),   # Chronic pain (chronic/disabling)
+        ("R06.0", "SYM_DYSPNEA", "SYM_LIFE"),      # Dyspnea (life-threatening)
+        ("R53.83", "SYM_FATIG", "SYM_DISAB"),      # Fatigue (chronic/disabling)
+        ("R26.9", "MOB_WALK", "MOB"),              # Gait abnormality (child + parent)
+        ("R41.3", "COG_MEM", "COG"),               # Memory loss (child + parent)
+        ("Z60.2", None, "SOC"),                     # Social isolation (parent only)
+    ]
+    cur.executemany("INSERT INTO sx_code_hazard_map (sx_code, hazard_subclass_id, hazard_class_id) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING", sx_code_hazard_map)
+
+    # --- Seed Dx code to hazard map ---
+    dx_code_hazard_map = [
+        ("G30.9", "COG_MEM", "COG"),          # Alzheimer's (child + parent)
+        ("F03.90", "COG_MEM", "COG"),         # Dementia (child + parent)
+        ("I69.351", "MOB_WALK", "MOB"),       # Hemiplegia (child + parent)
+        ("M81.0", "MOB_WALK", "MOB"),         # Osteoporosis (child + parent)
+        ("E11.9", None, "MED"),                # Diabetes (parent only)
+        ("F32.9", "MOOD_DEP", "MOOD"),        # Depression (child + parent)
+        ("I10", None, "MED"),                  # Hypertension (parent only)
+    ]
+    cur.executemany("INSERT INTO dx_code_hazard_map (dx_code, hazard_subclass_id, hazard_class_id) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING", dx_code_hazard_map)
+
+    # --- Seed Rx code to hazard map (optional, for high-risk meds) ---
+    rx_code_hazard_map = [
+        ("RX011", "SYM_PAIN_CHRONIC", "SYM_DISAB"),   # Gabapentin for chronic pain (child + parent)
+        ("RX013", "MOOD_DEP", "MOOD"),           # Sertraline for depression (child + parent)
+        ("RX004", None, "MED"),                    # Metformin (diabetes, parent only)
+    ]
+    cur.executemany("INSERT INTO rx_code_hazard_map (rx_code, hazard_subclass_id, hazard_class_id) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING", rx_code_hazard_map)
+
+    cur.close()
+    conn.close()
+
+if __name__ == "__main__":
+    seed_codes()
+
