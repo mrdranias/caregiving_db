@@ -1,7 +1,7 @@
 Relational database to link assessments to hazards and services.
 Rural Care Management System
 A comprehensive care management platform designed for rural healthcare providers, linking assessments to hazards, services, and local contractors.
-Features
+Features:
 
 Standardized Assessments: Universal assessment templates for rural care settings
 Hazard Identification: Systematic mapping of assessment results to care risks
